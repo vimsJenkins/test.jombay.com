@@ -1,65 +1,24 @@
 pipeline {
   agent any
-  environment {
-    registry = "magalixcorp/k8scicd"
-     GOCACHE = "/tmp"
-  }
   stages {
-    stage('Build') {
-      agent {
-        docker {
-          image 'golang'
-        }
-      }
-      steps {
-        // Create our project directory.
-        sh 'cd ${GOPATH}/src'
-        sh 'mkdir -p ${GOPATH}/src/hello-world'
-        // Copy all files in our Jenkins workspace to our project directory.
-        sh 'cp -r ${WORKSPACE}/* ${GOPATH}/src/hello-world'
-        // Build the app.
-        sh 'go build'
-      }    
-    }
-    stage('Test') {
-      agent {
-        docker {
-          image 'golang'
-        }
-      }
-      steps {                
-        // Create our project directory.
-        sh 'cd ${GOPATH}/src'
-        sh 'mkdir -p ${GOPATH}/src/hello-world'
-        // Copy all files in our Jenkins workspace to our project directory.
-        sh 'cp -r ${WORKSPACE}/* ${GOPATH}/src/hello-world'
-        // Remove cached test results.
-        sh 'go clean -cache'
-        // Run Unit Tests.
-        sh 'go test ./... -v -short'           
-      }
-    }
-    stage('Publish') {
-      environment {
-        registryCredential = 'dockerhub'
-      }
-      steps{
-        script {
-          def appimage = docker.build registry + ":$BUILD_NUMBER"
-          docker.withRegistry( '', registryCredential ) {
-            appimage.push()
-            appimage.push('latest')
+    stage('Branch:2 Stage 1') {
+      parallel {
+        stage('Branch:2 Stage 1') {
+          steps {
+            echo 'Branch:2 Hello Stage 1 step 1'
+            sleep 10
+            echo 'Branch:2 Stage 1 step 3 after 10 seconds'
           }
         }
-      }
-    }
-    stage ('Deploy') {
-      steps {
-        script{
-          def image_id = registry + ":$BUILD_NUMBER"
-          sh "ansible-playbook  playbook.yml --extra-vars \"image_id=${image_id}\""
+
+        stage('Branch:2 PStage2') {
+          steps {
+            echo 'Branch:2 PStage 2 step 1'
+          }
         }
+
       }
     }
+
   }
 }
