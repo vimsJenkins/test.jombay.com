@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Cloning Git') {
       steps {
-        git(url: 'https://github.com/vimsJenkins/node.jenkins.in.git', branch: 'main', credentialsId: 'vimleshpatel')
+        git(url: 'https://github.com/vimsJenkins/node.jenkins.in.git', branch: 'main')
       }
     }
 
