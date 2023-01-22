@@ -1,25 +1,25 @@
 pipeline {
+  agent any
   environment {
-    imagename = "vimleshpatel/node.jenkins"
-    registryCredential = 'vimleshpatel'
-    dockerImage = ''
     DOCKERHUB_CREDS=credentials('vimleshpatel')
   }
-  agent any
   stages {
     stage('Cloning Git') {
       steps {
-        git 'https://github.com/vimsJenkins/node.jenkins.in.git'
+        sh 'git clone https://github.com/vimsJenkins/node.jenkins.in.git'
       }
     }
-
     stage('Building image') {
-      steps{
+      steps {
         sh 'docker build -t vimleshpatel/node.jenkins:latest .'
       }
     }
     stage('Login') {
-      sh 'echo $DOCKERHUB_CREDS_PSW | docker loging -u $DOCKERHUB_CREDS_USR --password-stdin'
+      steps {
+        withCredentials([usernamePassword(credentials: 'vimleshpatel', usernameVariable: username, passwordVariable: password)]){
+          sh 'echo $password | docker loging -u $username --password-stdin'
+        }
+      }
     }
     stage('Deploy Image') {
       steps{
@@ -34,14 +34,5 @@ pipeline {
       }
     }
 
-  }
-  environment {
-    imagename = 'vimleshpatel/node.jenkins'
-    dockerImage = ''
-  }
-  post {
-    always {
-      sh 'docker logout'
-    }
   }
 }
